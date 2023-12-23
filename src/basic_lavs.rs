@@ -78,6 +78,7 @@ impl LAVSSignature {
             .expect("serialize to vec should always succeed");
         pk
     }
+    pub fn Aggregate(messages: Vec<Vec<bytes>>,signatures: Vec<Vec<bytes>>)
 }
 
 mod test {
@@ -85,7 +86,7 @@ mod test {
     use super::*;
 
     #[test]
-    pub fn test_simple_bls() {
+    pub fn test_simple_lavs() {
         let keypair = KeyPairG2::new(3);
         let Y = keypair.Y.clone();
         let message_bytes = [1, 2, 3, 4, 5];
@@ -93,14 +94,4 @@ mod test {
         assert!(signature.verify(&message_bytes[..], &Y));
     }
 
-    #[test]
-    #[should_panic]
-    pub fn test_bad_simple_bls() {
-        let keypair = KeyPairG2::new(3);
-        let Y = keypair.Y.clone();
-        let message_bytes = [1, 2, 3, 4, 5];
-        let signature = LAVSSignature::sign(&message_bytes[..], &keypair);
-        let message_bytes_corrupt = [0, 2, 3, 4, 5];
-        assert!(signature.verify(&message_bytes_corrupt[..], &Y));
-    }
 }

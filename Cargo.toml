@@ -1,6 +1,6 @@
 [package]
 name = "lavs"
-version = "0.1"
+version = "0.1.0"
 description = "Locally Verifiable Signature and Key Aggregation"
 edition = "2021"
 
