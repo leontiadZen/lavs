@@ -55,7 +55,7 @@ impl LAVSSignature {
         }
     }
 
-    // check e(H(m), Y) == e(sigma, g2)
+    // check e(σ, g2^a * g2^H(m)) == e(g1, g2)
     pub fn verify(&self, message: &[u8], pubkey: &GE2) -> bool {
         
         //message as BigInt
@@ -78,15 +78,67 @@ impl LAVSSignature {
             .expect("serialize to vec should always succeed");
         pk
     }
-    pub fn Aggregate(messages: Vec<Vec<bytes>>,signatures: Vec<Vec<bytes>>)
-}
+
+    //from https://www.di.ens.fr/david.pointcheval/Documents/Papers/2007_pairing.pdf fig 2, p12.
+    //Running time: O(n**2). Can be improved in Langange interpolation trick as explained in the paper. 
+    pub fn DPP(messages: Vec<Vec<u8>>,mut signatures: Vec<LAVSSignature>)->GE1{
+        let n = messages.len();
+        for i in  0..n - 1{
+		for j in i+1..n{
+			if  i != j 
+			{
+                //x[l]-x[j]
+				let diff_1 =  BigInt::from_bytes(&messages[j]) - BigInt::from_bytes(&messages[i]);
+                let diff_1_scalar: FE1 = ECScalar::from(&diff_1);
+                //1/(x[l]-x[j])
+                let tmp_invert = diff_1_scalar.invert();
+
+
+                //P[j]-P[l]
+                let mut neg_sig2 = signatures[j].sigma.bytes_compressed_to_big_int();
+                neg_sig2 = -neg_sig2;
+                let neg_g1: FE1 = ECScalar::from(&neg_sig2);
+                let exp  = GE1::generator() * neg_g1;
+				let diff_2 =  signatures[i].sigma + exp;
+
+                // 1/(x[l]-x[j]) * P[j]-P[l]
+				signatures[j].sigma = diff_2 * tmp_invert; 
+			}
+		}
+	}
+    signatures[n-1].sigma
+    }
+    pub fn aggregate(messages: Vec<Vec<u8>>,signatures: Vec<LAVSSignature>,pubkey: &GE2) ->GE1 {
+        let n = messages.len();
+        let l = signatures.len();
+        assert_eq!(n,l);
+
+        for (msg,sig) in messages.iter().zip(signatures.iter()) {
+            assert!(sig.verify(&msg[..], pubkey));
+
+        }
+
+        LAVSSignature::DPP(messages,signatures)
+
+     }
+ }
 
 mod test {
     #[allow(unused_imports)]
     use super::*;
 
     #[test]
-    pub fn test_simple_lavs() {
+    pub fn test_single_lavs_signature() {
+        let test_vec:Vec<i32> = vec![1,3,2,5];
+        let result = test_vec.iter()
+            .zip(test_vec.iter().skip(1))
+            .inspect(|(a ,b)| println!("a: {},b: {}", a,b))
+            .map(|(a,b)| b-a)
+            .collect::<Vec<_>>();
+        println!("{:?}", result);
+
+
+        let a:Vec<Vec<i32>>;
         let keypair = KeyPairG2::new(3);
         let Y = keypair.Y.clone();
         let message_bytes = [1, 2, 3, 4, 5];
