@@ -100,6 +100,7 @@ impl Ciphertext {
 
         }
         let c2 = Pair::compute_pairing(&(GE1::generator()*&r), &(GE2::generator()));
+        //TODO: multiply the pair by message is missing
         Ciphertext{c1,c2}
 
 
