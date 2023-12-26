@@ -99,6 +99,7 @@ impl Ciphertext {
             c1.push(Y);
 
         }
+        //TODO: multiple with the message the pair
         let c2 = Pair::compute_pairing(&(GE1::generator()*&r), &(GE2::generator()));
         Ciphertext{c1,c2}
 
