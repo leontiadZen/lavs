@@ -119,6 +119,29 @@ impl LAVSSignature {
 
      }
 
+/*
+Problem: Find betas s.t: Π(y+xi) = Σ(biy^i) for i in l
+
+Example for y in Zp* and 3 messages
+y=1
+(1+x1)(1+x2)(1+x3)= b1+b2+b3 (1)
+
+y=2 
+(2+x1)(2+x2)(2+x3)= b1+2b2+4b3 (2) 
+
+y=3
+(3+x1)(3+x2)(3+x3)= b1+3b2+9b3 (3)
+
+(2)-(1) = 
+
+(2+x1)(2+x2)(2+x3) - (1+x1)(1+x2)(1+x3) = b2-3b3 (4)
+Solve for b2 = kb3 (5)
+
+Plug to (4). Solve for b3
+Plug to (5). Solve for b2
+Plug to (1) or (2) and solve for b1
+     */
+
     //  pub fn compute_betas_coeff(messages: Vec<Vec<u8>>)->Vec<FE2>{
     //     //TODO. Not clear to me yet what the y's value should be to interpolate. Is Lagrange needed here?
     //  }
